@@ -48,16 +48,40 @@
         }
 
         h1 {
-            font-size: 2rem;
+            /* font-size: 2rem; */
+            font-size: clamp(1.5rem, 7vw, 2rem);
             margin-bottom: 20px;
             text-align: center;
             color: #333;
+            border: 1px solid #0000004a; /* рамка 1px */
         }
 
         .character-selection {
             margin-bottom: 20px;
             display: flex;
             gap: 20px;
+            justify-content: center;
+        }
+        .character-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .character-option button {
+            font-size: 40px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 8px;
+        }
+
+        .character-option .label {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 5px 10px 5px 10px;
+            text-align: center;
+            border-radius: 8px;
+            font-size: 14px;
         }
 
         .character-selection button {
@@ -68,10 +92,12 @@
             cursor: pointer;
             background: white;
             transition: transform 0.2s;
+            border: 1px solid #0000004a; /* рамка 1px */
         }
 
         .character-selection button:hover {
             transform: scale(1.1);
+            
         }
 
         .board {
@@ -117,9 +143,13 @@
 
         #message {
             font-size: 1.3rem;
-            min-height: 2em;
+            /* min-height: 2em; */
             text-align: center;
             margin-bottom: 15px;
+            border: 1px solid #0000004a; /* рамка 1px */
+            padding: 10px 20px 10px 20px; 
+            text-align: center; 
+            border-radius: 10px;
         }
 
         #reset {
@@ -136,6 +166,29 @@
             margin-top: 5px;
             font-size: 18px;
             text-align: center;
+            border: 1px solid #0000004a; /* рамка 1px */
+        }
+
+        #orientation-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            text-align: center;
+            font-size: 24px;
+            padding: 20px;
+            transition: opacity 0.3s ease;
+        }
+
+        .overlay-content {
+            max-width: 90%;
         }
 
         @media (max-width: 400px) {
@@ -152,6 +205,7 @@
 
             .character-selection button {
                 font-size: 2rem;
+                
             }
             .label {
             margin-top: 5px;
@@ -161,44 +215,35 @@
         }
     </style>
 </head>
-
 <body>
-
     <div class="background-hearts" id="hearts"></div>
     <h1
         style="background-color: rgba(255, 255, 255, 0.8); padding: 10px 20px 10px 20px; text-align: center; border-radius: 10px;">
         Мальчики-девочки</h1>
     <div id="message"
-        style="background-color: rgba(255, 255, 255, 0.8); padding: 10px 20px 0px 20px; text-align: center; border-radius: 10px;">
-        Выбери за кого будешь играть</div>
+        style="background-color: rgba(255, 255, 255, 0.8); ">
+        Выбери за кого будешь играть
+    </div>
     <div class="character-selection" id="characterSelection">
         <div class="character-option">
-            <button onclick="selectCharacter('boy')">👦</button>
-            <div class="label"
-                style="background-color: rgba(255, 255, 255, 0.8); padding: 1px 4px 0px 4px; text-align: center; border-radius: 8px;">
-                Мальчик</div>
+            <button onclick="selectCharacter('boy')">👦🏻</button>
+            <div class="label">Мальчик</div>
         </div>
         <div class="character-option">
-            <button onclick="selectCharacter('girl')">👧</button>
-            <div class="label"
-                style="background-color: rgba(255, 255, 255, 0.8); padding: 1px 4px 0px 4px; text-align: center; border-radius: 8px;">
-                Девочка</div>
+            <button onclick="selectCharacter('girl')">👧🏻</button>
+            <div class="label">Девочка</div>
         </div>
     </div>
-
-
     <div class="board" id="board" style="display:none;"></div>
     <button id="reset" onclick="resetGame()">Заново</button>
-
-
     <script>
         const WINNER = "girl"; // изменить на "boy" или "girl"
         const excuses = [
             "Ой, мне срочно нужно идти!",
-            "Что-то у меня подвисло, давай потом?",
+            "Что-то у меня подвисло, давай потом поиграем?",
             "Ты уверен(а), что всё правильно? Перезапусти!",
             "Я так не играю 😠",
-            "Не могу продолжать. Срочно нужно на ГЕНДЕР ПАТИ!"
+            "Не могу продолжать. Меня пригласили на ГЕНДЕР ПАТИ!"
         ];
         const thinkingMessages = ["Хмм...", "Думаю...", "Секундочку...", "Сложный выбор..."];
         let player = null;
@@ -217,7 +262,6 @@
             drawBoard();
             setMessage("Ваш ход!");
         }
-
         function drawBoard() {
             const boardDiv = document.getElementById("board");
             boardDiv.innerHTML = "";
@@ -225,14 +269,13 @@
                 const cellDiv = document.createElement("div");
                 cellDiv.className = "cell";
                 if (cell) {
-                    cellDiv.textContent = cell === "boy" ? "👦" : "👧";
+                    cellDiv.textContent = cell === "boy" ? "👦🏻" : "👧🏻";
                     cellDiv.classList.add("taken");
                 }
                 cellDiv.onclick = () => handleMove(idx);
                 boardDiv.appendChild(cellDiv);
             });
         }
-
         function handleMove(idx) {
             if (gameOver || !allowClick || board[idx]) return;
             board[idx] = player;
@@ -248,32 +291,40 @@
             currentPlayer = "computer";
             allowClick = false;
             setMessage(thinkingMessages[Math.floor(Math.random() * thinkingMessages.length)]);
-            setTimeout(() => {
-                makeComputerMove();
-                drawBoard();
-                if (checkWin(computer)) {
-                    if (player === WINNER) {
-                        fakeExcuse();
+                setTimeout(() => {
+                    let move = getBestMove();
+
+                    // Проверяем: если после этого хода компьютер выиграет, и игрок - WINNER
+                    board[move] = computer;
+                    const isWinningMove = checkWin(computer);
+                    board[move] = null; // Откатываем временно
+
+                    if (isWinningMove && player === WINNER) {
+                        fakeExcuse(); // Никакого хода!
                         return;
                     }
-                    endGame(computer);
-                    return;
-                }
-                if (!board.includes(null)) {
-                    endGame(null);
-                    return;
-                }
-                currentPlayer = "player";
-                allowClick = true;
-                setMessage("Ваш ход!");
-            }, 1000 + Math.random() * 2000);
-        }
+                    // Иначе — делаем обычный ход
+                    board[move] = computer;
+                    drawBoard();
 
+                    if (isWinningMove) {
+                        endGame(computer);
+                        return;
+                    }
+                    if (!board.includes(null)) {
+                        endGame(null);
+                        return;
+                    }
+
+                    currentPlayer = "player";
+                    allowClick = true;
+                    setMessage("Ваш ход!");
+                }, 500 + Math.random() * 3000);
+        }
         function makeComputerMove() {
             let move = getBestMove();
             board[move] = computer;
         }
-
         function getBestMove() {
             const emptyIndices = board.map((v, i) => v === null ? i : null).filter(i => i !== null);
             if (player !== WINNER) {
@@ -283,7 +334,6 @@
                 return emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
             }
         }
-
         function checkWin(symbol) {
             const wins = [
                 [0, 1, 2], [3, 4, 5], [6, 7, 8],
@@ -292,7 +342,6 @@
             ];
             return wins.find(comb => comb.every(i => board[i] === symbol));
         }
-
         function endGame(winner) {
             gameOver = true;
             const winCombo = checkWin(winner);
@@ -305,16 +354,13 @@
                 setMessage("Ничья! Попробуй ещё раз!");
             }
         }
-
         function fakeExcuse() {
             gameOver = true;
             setMessage(excuses[Math.floor(Math.random() * excuses.length)]);
         }
-
         function setMessage(msg) {
             document.getElementById("message").textContent = msg;
         }
-
         function resetGame() {
             board = Array(9).fill(null);
             gameOver = false;
@@ -326,16 +372,12 @@
             document.getElementById("board").style.display = "none";
             setMessage("Выбери ещё раз");
         }
-
         function minimax(newBoard, playerSymbol) {
             const availSpots = newBoard.map((v, i) => v === null ? i : null).filter(i => i !== null);
-
             if (checkWin(player)) return { score: -10 };
             if (checkWin(computer)) return { score: 10 };
             if (availSpots.length === 0) return { score: 0 };
-
             const moves = [];
-
             for (let i = 0; i < availSpots.length; i++) {
                 const move = {};
                 move.index = availSpots[i];
@@ -347,7 +389,6 @@
                 newBoard[availSpots[i]] = null;
                 moves.push(move);
             }
-
             let bestMove;
             if (playerSymbol === computer) {
                 let bestScore = -Infinity;
@@ -366,11 +407,9 @@
                     }
                 }
             }
-
             return moves[bestMove];
         }
     </script>
-
     <script>
         // Фон из сердечек
         (function generateHeartsBackground() {
@@ -385,6 +424,25 @@
             }
         })();
     </script>
-</body>
+    <script>
+        function updateOverlay() {
+            const overlay = document.getElementById("orientation-overlay");
+            if (!overlay) return;
 
+            const isLandscape = window.innerWidth > window.innerHeight;
+            const isProbablyPhone = window.innerHeight < 600;
+
+            overlay.style.display = (isLandscape && isProbablyPhone) ? "flex" : "none";
+        }
+
+        window.addEventListener("load", updateOverlay);
+        window.addEventListener("resize", updateOverlay);
+        window.addEventListener("orientationchange", updateOverlay);
+    </script>
+    <div id="orientation-overlay">
+        <div class="overlay-content">
+            Мы не фильм смотрим 📱😂<br>Возьми телефон нормально!
+        </div>
+    </div>
+</body>
 </html>
